@@ -1,0 +1,38 @@
+================================================================================
+  IMPACTRACK - INSTRUÇÕES PARA CRIAR O BANCO DE DADOS (DBeaver 24.2.0)
+================================================================================
+
+1) CRIAR O BANCO DE DADOS
+   - Abra o DBeaver e conecte ao servidor PostgreSQL (localhost ou seu servidor).
+   - Clique com o botão direito em "Databases" (ou no servidor) e escolha
+     "Create" > "Database".
+   - Nome do banco: impactrack
+   - Confirme (OK).
+
+2) EXECUTAR O SCRIPT SQL
+   - No DBeaver, selecione a conexão do PostgreSQL e o banco "impactrack".
+   - Abra o arquivo: scripts/schema.sql
+   - Ou: menu "SQL Editor" > "Open SQL Script" e selecione schema.sql
+   - Certifique-se de que o banco ativo no combo/contexto é "impactrack".
+   - Execute o script: Ctrl+Enter ou botão "Execute SQL Statement(s)".
+
+3) CONFIGURAR O BACKEND
+   - Edite src/main/resources/application.properties
+   - Ajuste se necessário:
+     spring.datasource.url=jdbc:postgresql://localhost:5432/impactrack
+     spring.datasource.username=postgres
+     spring.datasource.password=sua_senha
+
+4) RODAR O BACKEND
+   - No diretório "Impactrack BackEnd":
+     mvn spring-boot:run
+   - A API ficará em http://localhost:8080
+   - Endpoints:
+     GET  /api/companies        - todas as empresas
+     GET  /api/companies/destaques - empresas em destaque (página inicial)
+     GET  /api/companies/explorar  - empresas não-destaque (aba Explorar)
+     GET  /api/companies/{id}    - uma empresa
+     POST /api/companies        - cadastrar empresa (Admin)
+     PATCH /api/companies/{id}/destaque - alternar destaque (Admin)
+
+================================================================================

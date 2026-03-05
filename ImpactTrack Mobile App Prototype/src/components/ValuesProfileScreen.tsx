@@ -1,4 +1,4 @@
-import { ArrowLeft, Home, Compass, User } from 'lucide-react';
+import { ArrowLeft, Home, Compass } from 'lucide-react';
 import type { Screen, UserValues } from '../App';
 
 interface ValuesProfileScreenProps {
@@ -150,20 +150,19 @@ export function ValuesProfileScreen({ onNavigate, userValues, setUserValues }: V
       {/* Bottom Navigation */}
       <div className="bg-white border-t border-gray-200 px-6 md:px-8 py-4">
         <div className="max-w-7xl mx-auto flex items-center justify-around md:justify-center md:gap-16">
-          <button 
+          <button
             onClick={() => onNavigate('home')}
-            className="flex flex-col items-center text-gray-400 hover:text-gray-600 transition-colors"
+            className="flex flex-col items-center text-emerald-500"
           >
             <Home className="w-6 h-6 md:w-7 md:h-7 mb-1" />
             <span className="text-xs md:text-sm">Home</span>
           </button>
-          <button className="flex flex-col items-center text-gray-400">
+          <button
+            onClick={() => onNavigate('explore')}
+            className="flex flex-col items-center text-gray-400 hover:text-gray-600 transition-colors"
+          >
             <Compass className="w-6 h-6 md:w-7 md:h-7 mb-1" />
             <span className="text-xs md:text-sm">Explorar</span>
-          </button>
-          <button className="flex flex-col items-center text-emerald-500">
-            <User className="w-6 h-6 md:w-7 md:h-7 mb-1" />
-            <span className="text-xs md:text-sm">Perfil</span>
           </button>
         </div>
       </div>
