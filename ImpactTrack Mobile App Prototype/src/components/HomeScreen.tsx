@@ -3,10 +3,12 @@ import type { Screen, Company } from '../App';
 
 interface HomeScreenProps {
   companies: Company[];
+  loading?: boolean;
+  error?: string | null;
   onNavigate: (screen: Screen, company?: Company) => void;
 }
 
-export function HomeScreen({ companies, onNavigate }: HomeScreenProps) {
+export function HomeScreen({ companies, loading, error, onNavigate }: HomeScreenProps) {
   const handleCompanyClick = (company: Company) => {
     onNavigate('search', company);
   };
@@ -45,7 +47,11 @@ export function HomeScreen({ companies, onNavigate }: HomeScreenProps) {
         <div className="max-w-7xl mx-auto">
           <h3 className="text-gray-900 mb-4 md:mb-6 text-xl md:text-2xl">Empresas em Destaque</h3>
 
-          {companies.length === 0 ? (
+          {loading ? (
+            <p className="text-gray-500 text-center py-8">Carregando...</p>
+          ) : error ? (
+            <p className="text-red-600 text-center py-8">{error}</p>
+          ) : companies.length === 0 ? (
             <p className="text-gray-500 text-center py-8">
               Nenhuma empresa em destaque no momento. Use <strong>Explorar</strong> para ver todas.
             </p>

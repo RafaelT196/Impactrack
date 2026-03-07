@@ -73,6 +73,13 @@ public class CompanyService {
         });
     }
 
+    @Transactional
+    public boolean deleteById(Long id) {
+        if (!repository.existsById(id)) return false;
+        repository.deleteById(id);
+        return true;
+    }
+
     private CompanyResponse toResponse(Company c) {
         CompanyResponse r = new CompanyResponse();
         r.setId(c.getId());

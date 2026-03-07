@@ -46,9 +46,15 @@ export interface UserValues {
   governance: number;
 }
 
+const WELCOME_KEY = 'impactrack_has_seen_welcome';
+
+function getInitialScreen(): Screen {
+  return typeof localStorage !== 'undefined' && localStorage.getItem(WELCOME_KEY) ? 'home' : 'splash';
+}
+
 export default function App() {
-  const { companies } = useCompanies();
-  const [currentScreen, setCurrentScreen] = useState<Screen>('splash');
+  const { companies, loading, error } = useCompanies();
+  const [currentScreen, setCurrentScreen] = useState<Screen>(getInitialScreen);
   const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
   const [userValues, setUserValues] = useState<UserValues>({
     environmental: 70,
@@ -61,6 +67,9 @@ export default function App() {
     if (company) {
       setSelectedCompany(company);
     }
+    if (screen === 'home' && currentScreen === 'splash') {
+      localStorage.setItem(WELCOME_KEY, '1');
+    }
     setCurrentScreen(screen);
   };
 
@@ -72,10 +81,20 @@ export default function App() {
       <div className="w-full h-screen bg-white md:bg-gray-100 overflow-hidden">
         {currentScreen === 'splash' && <SplashScreen onNavigate={navigateTo} />}
         {currentScreen === 'home' && (
-          <HomeScreen companies={highlightedCompanies} onNavigate={navigateTo} />
+          <HomeScreen
+            companies={highlightedCompanies}
+            loading={loading}
+            error={error}
+            onNavigate={navigateTo}
+          />
         )}
         {currentScreen === 'explore' && (
-          <ExploreScreen companies={exploreCompanies} onNavigate={navigateTo} />
+          <ExploreScreen
+            companies={exploreCompanies}
+            loading={loading}
+            error={error}
+            onNavigate={navigateTo}
+          />
         )}
         {currentScreen === 'search' && (
           <SearchResultScreen onNavigate={navigateTo} company={selectedCompany} />

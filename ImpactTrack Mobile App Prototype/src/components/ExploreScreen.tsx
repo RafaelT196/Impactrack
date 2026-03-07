@@ -3,10 +3,12 @@ import type { Screen, Company } from '../App';
 
 interface ExploreScreenProps {
   companies: Company[];
+  loading?: boolean;
+  error?: string | null;
   onNavigate: (screen: Screen, company?: Company) => void;
 }
 
-export function ExploreScreen({ companies, onNavigate }: ExploreScreenProps) {
+export function ExploreScreen({ companies, loading, error, onNavigate }: ExploreScreenProps) {
   const handleCompanyClick = (company: Company) => {
     onNavigate('search', company);
   };
@@ -47,7 +49,11 @@ export function ExploreScreen({ companies, onNavigate }: ExploreScreenProps) {
             Todas as empresas
           </h3>
 
-          {companies.length === 0 ? (
+          {loading ? (
+            <p className="text-gray-500 text-center py-8">Carregando...</p>
+          ) : error ? (
+            <p className="text-red-600 text-center py-8">{error}</p>
+          ) : companies.length === 0 ? (
             <p className="text-gray-500 text-center py-8">
               Nenhuma empresa fora dos destaques no momento.
             </p>

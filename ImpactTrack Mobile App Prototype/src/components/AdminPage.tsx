@@ -1,76 +1,78 @@
 import { useState } from 'react';
-import { Leaf, Plus, Star, LogOut } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Leaf, Plus, Star, LogOut, Trash2 } from 'lucide-react';
 import { useCompanies } from '../context/CompaniesContext';
 
-const defaultCriteria = {
-  emissions: '',
-  renewable: '',
-  diversity: '',
-  labor: '',
-  transparency: '',
+const STORAGE_KEY = 'impactrack_admin_logged_in';
+
+/** Único admin permitido (para produção, mover para backend com hash de senha) */
+const ADMIN_CREDENTIALS = {
+  email: 'brunobrendhan.g@gmail.com',
+  password: '123456',
 };
 
+function getStoredAdminLoggedIn(): boolean {
+  try {
+    return sessionStorage.getItem(STORAGE_KEY) === 'true';
+  } catch {
+    return false;
+  }
+}
+
 export function AdminPage() {
-  const { companies, addCompany, toggleHighlight } = useCompanies();
-  const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(false);
+  const { companies, loading, error, toggleHighlight, deleteCompany } = useCompanies();
+  const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(getStoredAdminLoggedIn);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [showForm, setShowForm] = useState(false);
-  const [form, setForm] = useState({
-    name: '',
-    category: '',
-    description: '',
-    environmental: 0,
-    social: 0,
-    governance: 0,
-    criteria: { ...defaultCriteria },
-    alerts: '' as string,
-    highlighted: false,
-  });
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [togglingId, setTogglingId] = useState<number | null>(null);
+  const [deletingId, setDeletingId] = useState<number | null>(null);
 
   const handleAdminLogin = (e: React.FormEvent) => {
     e.preventDefault();
+    setSubmitError(null);
+    const emailTrim = email.trim().toLowerCase();
+    const isAllowed =
+      emailTrim === ADMIN_CREDENTIALS.email.toLowerCase() &&
+      password === ADMIN_CREDENTIALS.password;
+    if (!isAllowed) {
+      setSubmitError('E-mail ou senha inválidos. Acesso restrito ao administrador.');
+      return;
+    }
+    sessionStorage.setItem(STORAGE_KEY, 'true');
     setIsAdminLoggedIn(true);
   };
 
   const handleLogout = () => {
+    sessionStorage.removeItem(STORAGE_KEY);
     setIsAdminLoggedIn(false);
     setEmail('');
     setPassword('');
   };
 
-  const handleSubmitCompany = (e: React.FormEvent) => {
-    e.preventDefault();
-    const esgScore = Math.round(
-      (form.environmental + form.social + form.governance) / 3
-    );
-    addCompany({
-      name: form.name,
-      category: form.category,
-      description: form.description,
-      logo: '',
-      esgScore,
-      environmental: form.environmental,
-      social: form.social,
-      governance: form.governance,
-      criteria: form.criteria,
-      highlighted: form.highlighted,
-      alerts: form.alerts
-        ? form.alerts.split('\n').map((s) => s.trim()).filter(Boolean)
-        : undefined,
-    });
-    setForm({
-      name: '',
-      category: '',
-      description: '',
-      environmental: 0,
-      social: 0,
-      governance: 0,
-      criteria: { ...defaultCriteria },
-      alerts: '',
-      highlighted: false,
-    });
-    setShowForm(false);
+  const handleToggleHighlight = async (id: number) => {
+    setSubmitError(null);
+    setTogglingId(id);
+    try {
+      await toggleHighlight(id);
+    } catch (err) {
+      setSubmitError(err instanceof Error ? err.message : 'Erro ao atualizar destaque');
+    } finally {
+      setTogglingId(null);
+    }
+  };
+
+  const handleDelete = async (id: number, name: string) => {
+    if (!window.confirm(`Excluir a empresa "${name}"? Esta ação não pode ser desfeita.`)) return;
+    setSubmitError(null);
+    setDeletingId(id);
+    try {
+      await deleteCompany(id);
+    } catch (err) {
+      setSubmitError(err instanceof Error ? err.message : 'Erro ao excluir empresa');
+    } finally {
+      setDeletingId(null);
+    }
   };
 
   if (!isAdminLoggedIn) {
@@ -86,6 +88,11 @@ export function AdminPage() {
           <h3 className="text-gray-900 mb-8 text-center text-2xl md:text-3xl">
             Acesso administrativo
           </h3>
+          {submitError && (
+            <div className="mb-4 p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">
+              {submitError}
+            </div>
+          )}
           <form onSubmit={handleAdminLogin} className="space-y-5">
             <div>
               <label className="block text-gray-700 mb-2 text-base md:text-lg">E-mail</label>
@@ -160,15 +167,26 @@ export function AdminPage() {
       <div className="max-w-5xl mx-auto px-6 py-8">
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-2xl text-gray-900">Empresas cadastradas</h1>
-          <button
-            onClick={() => setShowForm(true)}
+          <Link
+            to="/admin/nova-empresa"
             className="flex items-center gap-2 bg-emerald-500 text-white px-4 py-2.5 rounded-xl hover:bg-emerald-600 transition-colors"
           >
             <Plus className="w-5 h-5" />
             Cadastrar nova empresa
-          </button>
+          </Link>
         </div>
 
+        {(error || submitError) && (
+          <div className="mb-4 p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">
+            {submitError ?? error}
+          </div>
+        )}
+
+        {loading ? (
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 text-center text-gray-500">
+            Carregando empresas...
+          </div>
+        ) : (
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
           <ul className="divide-y divide-gray-100">
             {companies.map((company) => (
@@ -180,192 +198,39 @@ export function AdminPage() {
                   <p className="font-medium text-gray-900">{company.name}</p>
                   <p className="text-sm text-gray-500">{company.category}</p>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => toggleHighlight(company.id)}
-                  className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
-                  title={company.highlighted ? 'Remover dos destaques' : 'Adicionar empresa aos destaques'}
-                >
-                  <Star
-                    className={`w-6 h-6 transition-colors ${
-                      company.highlighted
-                        ? 'fill-amber-400 text-amber-500'
-                        : 'fill-transparent text-gray-300 hover:text-amber-300'
-                    }`}
-                    strokeWidth={company.highlighted ? 2 : 1.5}
-                  />
-                </button>
+                <div className="flex items-center gap-1">
+                  <button
+                    type="button"
+                    onClick={() => handleToggleHighlight(company.id)}
+                    disabled={togglingId === company.id}
+                    className="p-2 rounded-lg hover:bg-gray-100 transition-colors disabled:opacity-50"
+                    title={company.highlighted ? 'Remover dos destaques' : 'Adicionar empresa aos destaques'}
+                  >
+                    <Star
+                      className={`w-6 h-6 transition-colors ${
+                        company.highlighted
+                          ? 'fill-amber-400 text-amber-500'
+                          : 'fill-transparent text-gray-300 hover:text-amber-300'
+                      }`}
+                      strokeWidth={company.highlighted ? 2 : 1.5}
+                    />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleDelete(company.id, company.name)}
+                    disabled={deletingId === company.id}
+                    className="p-2 rounded-lg hover:bg-red-50 text-gray-400 hover:text-red-600 transition-colors disabled:opacity-50"
+                    title="Excluir empresa"
+                  >
+                    <Trash2 className="w-5 h-5" />
+                  </button>
+                </div>
               </li>
             ))}
           </ul>
         </div>
+        )}
       </div>
-
-      {/* Modal formulário */}
-      {showForm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
-          <div className="bg-white rounded-2xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6 border-b border-gray-100 flex items-center justify-between">
-              <h2 className="text-xl font-semibold text-gray-900">Nova empresa</h2>
-              <button
-                type="button"
-                onClick={() => setShowForm(false)}
-                className="text-gray-400 hover:text-gray-600 text-2xl leading-none"
-              >
-                ×
-              </button>
-            </div>
-            <form onSubmit={handleSubmitCompany} className="p-6 space-y-4">
-              <div>
-                <label className="block text-gray-700 mb-1 text-sm font-medium">Nome da empresa</label>
-                <input
-                  required
-                  value={form.name}
-                  onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                  placeholder="Ex: GreenTech Solutions"
-                />
-              </div>
-              <div>
-                <label className="block text-gray-700 mb-1 text-sm font-medium">Ramo da empresa</label>
-                <input
-                  required
-                  value={form.category}
-                  onChange={(e) => setForm((f) => ({ ...f, category: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                  placeholder="Ex: Tecnologia, Moda, Energia"
-                />
-              </div>
-              <div className="grid grid-cols-3 gap-3">
-                <div>
-                  <label className="block text-gray-700 mb-1 text-sm font-medium">Score ambiental (0-100)</label>
-                  <input
-                    type="number"
-                    min={0}
-                    max={100}
-                    required
-                    value={form.environmental || ''}
-                    onChange={(e) =>
-                      setForm((f) => ({ ...f, environmental: Number(e.target.value) || 0 }))
-                    }
-                    className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-gray-700 mb-1 text-sm font-medium">Score social (0-100)</label>
-                  <input
-                    type="number"
-                    min={0}
-                    max={100}
-                    required
-                    value={form.social || ''}
-                    onChange={(e) =>
-                      setForm((f) => ({ ...f, social: Number(e.target.value) || 0 }))
-                    }
-                    className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-gray-700 mb-1 text-sm font-medium">Score governança (0-100)</label>
-                  <input
-                    type="number"
-                    min={0}
-                    max={100}
-                    required
-                    value={form.governance || ''}
-                    onChange={(e) =>
-                      setForm((f) => ({ ...f, governance: Number(e.target.value) || 0 }))
-                    }
-                    className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                  />
-                </div>
-              </div>
-              <div>
-                <label className="block text-gray-700 mb-1 text-sm font-medium">Descrição da empresa (parágrafo)</label>
-                <textarea
-                  required
-                  rows={3}
-                  value={form.description}
-                  onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                  placeholder="Texto sobre a empresa e seu compromisso ESG..."
-                />
-              </div>
-              <p className="text-sm font-medium text-gray-700">Critérios ESG</p>
-              {(
-                ['emissions', 'renewable', 'diversity', 'labor', 'transparency'] as const
-              ).map((key) => (
-                <div key={key}>
-                  <label className="block text-gray-600 mb-1 text-xs">
-                    {key === 'emissions' && 'Emissões'}
-                    {key === 'renewable' && 'Energia renovável'}
-                    {key === 'diversity' && 'Diversidade'}
-                    {key === 'labor' && 'Práticas trabalhistas'}
-                    {key === 'transparency' && 'Transparência'}
-                  </label>
-                  <input
-                    value={form.criteria[key]}
-                    onChange={(e) =>
-                      setForm((f) => ({
-                        ...f,
-                        criteria: { ...f.criteria, [key]: e.target.value },
-                      }))
-                    }
-                    className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm"
-                    placeholder="Breve descrição..."
-                  />
-                </div>
-              ))}
-              <div>
-                <label className="block text-gray-700 mb-1 text-sm font-medium">
-                  Controvérsias / alertas (opcional, uma por linha)
-                </label>
-                <textarea
-                  rows={2}
-                  value={form.alerts}
-                  onChange={(e) => setForm((f) => ({ ...f, alerts: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm"
-                  placeholder="Cada linha vira um item na seção de controvérsias"
-                />
-              </div>
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  role="checkbox"
-                  aria-checked={form.highlighted}
-                  onClick={() => setForm((f) => ({ ...f, highlighted: !f.highlighted }))}
-                  className="flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-200 hover:bg-gray-50"
-                >
-                  <Star
-                    className={`w-5 h-5 transition-colors ${
-                      form.highlighted
-                        ? 'fill-amber-400 text-amber-500'
-                        : 'fill-transparent text-gray-300'
-                    }`}
-                    strokeWidth={form.highlighted ? 2 : 1.5}
-                  />
-                  <span className="text-sm">Adicionar empresa aos destaques (página inicial)</span>
-                </button>
-              </div>
-              <div className="flex gap-3 pt-4">
-                <button
-                  type="button"
-                  onClick={() => setShowForm(false)}
-                  className="flex-1 py-2.5 rounded-xl border border-gray-200 text-gray-700 hover:bg-gray-50"
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="submit"
-                  className="flex-1 py-2.5 rounded-xl bg-emerald-500 text-white hover:bg-emerald-600"
-                >
-                  Cadastrar empresa
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
