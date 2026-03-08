@@ -1,19 +1,20 @@
 import { useState } from 'react';
+import { useCompanies } from './context/CompaniesContext';
 import { SplashScreen } from './components/SplashScreen';
-import { LoginScreen } from './components/LoginScreen';
 import { HomeScreen } from './components/HomeScreen';
+import { ExploreScreen } from './components/ExploreScreen';
 import { SearchResultScreen } from './components/SearchResultScreen';
 import { CompanyDetailScreen } from './components/CompanyDetailScreen';
 import { ValuesProfileScreen } from './components/ValuesProfileScreen';
 import { RecommendationsScreen } from './components/RecommendationsScreen';
 
-export type Screen = 
-  | 'splash' 
-  | 'login' 
-  | 'home' 
-  | 'search' 
-  | 'detail' 
-  | 'profile' 
+export type Screen =
+  | 'splash'
+  | 'home'
+  | 'explore'
+  | 'search'
+  | 'detail'
+  | 'profile'
   | 'recommendations';
 
 export interface Company {
@@ -26,6 +27,8 @@ export interface Company {
   social: number;
   governance: number;
   category: string;
+  /** Se true, aparece na página inicial (destaques); se false, só em Explorar */
+  highlighted?: boolean;
   alerts?: string[];
   criteria: {
     emissions: string;
@@ -43,8 +46,15 @@ export interface UserValues {
   governance: number;
 }
 
+const WELCOME_KEY = 'impactrack_has_seen_welcome';
+
+function getInitialScreen(): Screen {
+  return typeof localStorage !== 'undefined' && localStorage.getItem(WELCOME_KEY) ? 'home' : 'splash';
+}
+
 export default function App() {
-  const [currentScreen, setCurrentScreen] = useState<Screen>('splash');
+  const { companies, loading, error } = useCompanies();
+  const [currentScreen, setCurrentScreen] = useState<Screen>(getInitialScreen);
   const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
   const [userValues, setUserValues] = useState<UserValues>({
     environmental: 70,
@@ -57,19 +67,51 @@ export default function App() {
     if (company) {
       setSelectedCompany(company);
     }
+    if (screen === 'home' && currentScreen === 'splash') {
+      localStorage.setItem(WELCOME_KEY, '1');
+    }
     setCurrentScreen(screen);
   };
+
+  const highlightedCompanies = companies.filter((c) => c.highlighted);
+  const exploreCompanies = companies.filter((c) => !c.highlighted);
 
   return (
     <div className="min-h-screen bg-gray-100">
       <div className="w-full h-screen bg-white md:bg-gray-100 overflow-hidden">
         {currentScreen === 'splash' && <SplashScreen onNavigate={navigateTo} />}
-        {currentScreen === 'login' && <LoginScreen onNavigate={navigateTo} />}
-        {currentScreen === 'home' && <HomeScreen onNavigate={navigateTo} />}
-        {currentScreen === 'search' && <SearchResultScreen onNavigate={navigateTo} company={selectedCompany} />}
-        {currentScreen === 'detail' && <CompanyDetailScreen onNavigate={navigateTo} company={selectedCompany} />}
-        {currentScreen === 'profile' && <ValuesProfileScreen onNavigate={navigateTo} userValues={userValues} setUserValues={setUserValues} />}
-        {currentScreen === 'recommendations' && <RecommendationsScreen onNavigate={navigateTo} userValues={userValues} />}
+        {currentScreen === 'home' && (
+          <HomeScreen
+            companies={highlightedCompanies}
+            loading={loading}
+            error={error}
+            onNavigate={navigateTo}
+          />
+        )}
+        {currentScreen === 'explore' && (
+          <ExploreScreen
+            companies={exploreCompanies}
+            loading={loading}
+            error={error}
+            onNavigate={navigateTo}
+          />
+        )}
+        {currentScreen === 'search' && (
+          <SearchResultScreen onNavigate={navigateTo} company={selectedCompany} />
+        )}
+        {currentScreen === 'detail' && (
+          <CompanyDetailScreen onNavigate={navigateTo} company={selectedCompany} />
+        )}
+        {currentScreen === 'profile' && (
+          <ValuesProfileScreen
+            onNavigate={navigateTo}
+            userValues={userValues}
+            setUserValues={setUserValues}
+          />
+        )}
+        {currentScreen === 'recommendations' && (
+          <RecommendationsScreen onNavigate={navigateTo} userValues={userValues} />
+        )}
       </div>
     </div>
   );

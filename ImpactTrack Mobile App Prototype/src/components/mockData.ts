@@ -11,6 +11,7 @@ export const mockCompanies: Company[] = [
     social: 85,
     governance: 84,
     category: 'Tecnologia',
+    highlighted: true,
     criteria: {
       emissions: 'Redução de 45% nas emissões nos últimos 3 anos',
       renewable: '80% da energia de fontes renováveis',
@@ -29,6 +30,7 @@ export const mockCompanies: Company[] = [
     social: 75,
     governance: 71,
     category: 'Moda',
+    highlighted: true,
     criteria: {
       emissions: 'Carbono neutro desde 2022',
       renewable: '95% materiais orgânicos ou reciclados',
@@ -47,6 +49,7 @@ export const mockCompanies: Company[] = [
     social: 82,
     governance: 75,
     category: 'Saúde',
+    highlighted: false,
     alerts: [
       'Investigação em andamento sobre práticas de precificação em 2023',
       'Multa ambiental por descarte inadequado (resolvida em 2024)'
@@ -69,6 +72,7 @@ export const mockCompanies: Company[] = [
     social: 88,
     governance: 89,
     category: 'Energia',
+    highlighted: true,
     criteria: {
       emissions: '100% energia limpa',
       renewable: 'Líder em inovação solar e eólica',
@@ -87,6 +91,7 @@ export const mockCompanies: Company[] = [
     social: 90,
     governance: 76,
     category: 'Alimentação',
+    highlighted: false,
     criteria: {
       emissions: 'Logística com baixo carbono',
       renewable: 'Agricultura regenerativa',
@@ -105,6 +110,7 @@ export const mockCompanies: Company[] = [
     social: 85,
     governance: 82,
     category: 'Finanças',
+    highlighted: false,
     criteria: {
       emissions: 'Operações 100% digitais',
       renewable: 'Investimentos verdes prioritários',

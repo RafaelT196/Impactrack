@@ -1,12 +1,14 @@
-import { Search, Home, Compass, User, Leaf } from 'lucide-react';
+import { Search, Home, Compass, Leaf } from 'lucide-react';
 import type { Screen, Company } from '../App';
-import { mockCompanies } from './mockData';
 
 interface HomeScreenProps {
+  companies: Company[];
+  loading?: boolean;
+  error?: string | null;
   onNavigate: (screen: Screen, company?: Company) => void;
 }
 
-export function HomeScreen({ onNavigate }: HomeScreenProps) {
+export function HomeScreen({ companies, loading, error, onNavigate }: HomeScreenProps) {
   const handleCompanyClick = (company: Company) => {
     onNavigate('search', company);
   };
@@ -22,19 +24,11 @@ export function HomeScreen({ onNavigate }: HomeScreenProps) {
       {/* Header */}
       <div className="bg-white px-6 md:px-8 pt-6 pb-4 shadow-sm">
         <div className="max-w-7xl mx-auto">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center">
-              <div className="bg-emerald-500 p-2 md:p-3 rounded-xl mr-2 md:mr-3">
-                <Leaf className="w-5 h-5 md:w-6 md:h-6 text-white" strokeWidth={2} />
-              </div>
-              <span className="text-emerald-900 text-xl md:text-2xl">ImpactTrack</span>
+          <div className="flex items-center mb-4">
+            <div className="bg-emerald-500 p-2 md:p-3 rounded-xl mr-2 md:mr-3">
+              <Leaf className="w-5 h-5 md:w-6 md:h-6 text-white" strokeWidth={2} />
             </div>
-            <button 
-              onClick={() => onNavigate('profile')}
-              className="w-10 h-10 md:w-12 md:h-12 bg-gray-100 rounded-full flex items-center justify-center hover:bg-gray-200 transition-colors"
-            >
-              <User className="w-5 h-5 md:w-6 md:h-6 text-gray-600" />
-            </button>
+            <span className="text-emerald-900 text-xl md:text-2xl">ImpactTrack</span>
           </div>
 
           <div className="relative">
@@ -53,8 +47,17 @@ export function HomeScreen({ onNavigate }: HomeScreenProps) {
         <div className="max-w-7xl mx-auto">
           <h3 className="text-gray-900 mb-4 md:mb-6 text-xl md:text-2xl">Empresas em Destaque</h3>
 
+          {loading ? (
+            <p className="text-gray-500 text-center py-8">Carregando...</p>
+          ) : error ? (
+            <p className="text-red-600 text-center py-8">{error}</p>
+          ) : companies.length === 0 ? (
+            <p className="text-gray-500 text-center py-8">
+              Nenhuma empresa em destaque no momento. Use <strong>Explorar</strong> para ver todas.
+            </p>
+          ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-            {mockCompanies.map((company) => (
+            {companies.map((company) => (
               <div
                 key={company.id}
                 onClick={() => handleCompanyClick(company)}
@@ -92,6 +95,7 @@ export function HomeScreen({ onNavigate }: HomeScreenProps) {
               </div>
             ))}
           </div>
+          )}
         </div>
       </div>
 
@@ -102,16 +106,12 @@ export function HomeScreen({ onNavigate }: HomeScreenProps) {
             <Home className="w-6 h-6 md:w-7 md:h-7 mb-1" />
             <span className="text-xs md:text-sm">Home</span>
           </button>
-          <button className="flex flex-col items-center text-gray-400 hover:text-gray-600 transition-colors">
-            <Compass className="w-6 h-6 md:w-7 md:h-7 mb-1" />
-            <span className="text-xs md:text-sm">Explorar</span>
-          </button>
-          <button 
-            onClick={() => onNavigate('profile')}
+          <button
+            onClick={() => onNavigate('explore')}
             className="flex flex-col items-center text-gray-400 hover:text-gray-600 transition-colors"
           >
-            <User className="w-6 h-6 md:w-7 md:h-7 mb-1" />
-            <span className="text-xs md:text-sm">Perfil</span>
+            <Compass className="w-6 h-6 md:w-7 md:h-7 mb-1" />
+            <span className="text-xs md:text-sm">Explorar</span>
           </button>
         </div>
       </div>

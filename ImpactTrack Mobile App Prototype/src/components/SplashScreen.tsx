@@ -23,7 +23,7 @@ export function SplashScreen({ onNavigate }: SplashScreenProps) {
       </div>
 
       <button
-        onClick={() => onNavigate('login')}
+        onClick={() => onNavigate('home')}
         className="w-full max-w-md bg-emerald-500 text-white py-4 md:py-5 rounded-2xl hover:bg-emerald-600 transition-colors shadow-md text-lg md:text-xl"
       >
         Começar
