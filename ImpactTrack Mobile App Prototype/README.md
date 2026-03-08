@@ -17,3 +17,5 @@
   Alvaro Rodrigues de Souza
 
   Rafael Correa Tamassia
+
+  Laura Pereira
