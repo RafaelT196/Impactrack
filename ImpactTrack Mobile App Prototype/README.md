@@ -11,5 +11,9 @@
 
   ## Membros do grupo
   Alessandro Rossetto
+
   Bruno Brendhan Gomes de Jesus
+  
   Alex Santos Leite
+
+  Alvaro Rodrigues de Souza
