@@ -1,8 +1,6 @@
 
   # ImpactTrack Mobile App Prototype
 
-  This is a code bundle for ImpactTrack Mobile App Prototype. The original project is available at https://www.figma.com/design/LrZGKYnutbjPSJON1Zgh3T/ImpactTrack-Mobile-App-Prototype.
-
   ## Running the code
 
   Run `npm i` to install the dependencies.
@@ -17,3 +15,5 @@
   Alex Santos Leite
 
   Alvaro Rodrigues de Souza
+
+  Rafael Correa Tamassia
