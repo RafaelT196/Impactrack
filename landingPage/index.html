@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ImpactTrack — App Mobile</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,600;0,9..40,700;1,9..40,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="header">
+    <div class="container">
+      <a href="#" class="logo">ImpactTrack</a>
+      <nav class="nav">
+        <a href="#video">Vídeo</a>
+        <a href="#galeria">Galeria</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="container">
+        <h1>ImpactTrack</h1>
+        <p class="hero-subtitle">Protótipo do aplicativo mobile para acompanhamento de impacto e métricas do seu projeto.</p>
+        <a href="#video" class="btn btn-primary">Ver demonstração</a>
+      </div>
+    </section>
+
+    <!-- Vídeo do YouTube: substitua VIDEO_ID pelo ID do seu vídeo (ex: em "https://www.youtube.com/watch?v=VIDEO_ID", use VIDEO_ID) -->
+    <section id="video" class="section section-video">
+      <div class="container">
+        <h2>Funcionamento do app</h2>
+        <p class="section-desc">Assista ao vídeo demonstrando o fluxo e as funcionalidades do ImpactTrack.</p>
+        <div class="video-wrapper">
+          <!-- Troque VIDEO_ID pelo ID do seu vídeo do YouTube -->
+          <iframe
+            src="https://www.youtube.com/embed/6Z055q8UOCE"
+            title="ImpactTrack — Demonstração"
+            frameborder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            allowfullscreen
+          ></iframe>
+        </div>
+      </div>
+    </section>
+
+    <section id="galeria" class="section section-gallery">
+      <div class="container">
+        <h2>Galeria do app</h2>
+        <p class="section-desc">Algumas telas e momentos do ImpactTrack.</p>
+        <div class="gallery">
+          <div class="gallery-item" role="button" tabindex="0" aria-label="Ampliar imagem">
+            <img src="images/Captura%20de%20tela%202026-03-09%20200749.png" alt="ImpactTrack — Tela 1" />
+          </div>
+          <div class="gallery-item" role="button" tabindex="0" aria-label="Ampliar imagem">
+            <img src="images/Captura%20de%20tela%202026-03-09%20200801.png" alt="ImpactTrack — Tela 2" />
+          </div>
+          <div class="gallery-item" role="button" tabindex="0" aria-label="Ampliar imagem">
+            <img src="images/Captura%20de%20tela%202026-03-09%20200816.png" alt="ImpactTrack — Tela 3" />
+          </div>
+          <div class="gallery-item" role="button" tabindex="0" aria-label="Ampliar imagem">
+            <img src="images/Captura%20de%20tela%202026-03-09%20200833.png" alt="ImpactTrack — Tela 4" />
+          </div>
+          <div class="gallery-item" role="button" tabindex="0" aria-label="Ampliar imagem">
+            <img src="images/Captura%20de%20tela%202026-03-09%20200847.png" alt="ImpactTrack — Tela 5" />
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <p>ImpactTrack — Projeto Integrador</p>
+    </div>
+  </footer>
+
+  <div id="lightbox" class="lightbox" role="dialog" aria-modal="true" aria-label="Imagem ampliada" hidden>
+    <button type="button" class="lightbox-close" aria-label="Fechar">×</button>
+    <div class="lightbox-backdrop"></div>
+    <div class="lightbox-content">
+      <img src="" alt="" />
+    </div>
+  </div>
+
+  <script src="lightbox.js"></script>
+</body>
+</html>
